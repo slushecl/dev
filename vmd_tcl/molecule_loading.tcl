@@ -1,3 +1,4 @@
+#!/usr/bin/env tclsh
 # file: molecule_loading.tcl
 
 # Creates a recursive glob function
@@ -28,29 +29,32 @@ proc rglob {dirlist globlist} {
     return $result
 }
 
-# Finds and loads first .pdb and first .dcd file found in the indicated 
+# Finds and loads first .ref.pdb and first .dcd file found in the indicated 
 # directories and its subdirectories. If no directories are entered the
 # the files are searched for starting from the current working directory.
-proc load_pdb_dcd { {pdb_file ""} {dcd_file ""} } {
-    if { $pdb_file=="" } {
+# Usage:
+# load_pdb_dcd [pdb_directory | pdb_file] [dcd_directory | dcd_file]
+proc load_pdb_dcd { {pdb_dir ""} {dcd_dir ""} } {
+    if { $pdb_dir=="" } {
         set pdb [lindex [rglob . *.ref.pdb] 0]
-        set pdb_file $pdb
-        echo $pdb_file
+    } else {
+        set pdb [lindex [rglob $pdb_dir *.ref.pdb] 0]
     }
-    if { $dcd_file=="" } {
+    if { $dcd_dir=="" } {
         set dcd [lindex [rglob . *.dcd] 0]
-        set dcd_file $dcd
-        echo $dcd_file
+    } else {
+        set dcd [lindex [rglob $dcd_dir *.dcd] 0]
     }
-    if {$pdb_file != "" && $dcd_file != ""} {
+    if { $pdb != {}  && $dcd != {} } {
         mol new
-        mol addfile $pdb_file
-        mol addfile $dcd_file waitfor all
+        mol addfile $pdb
+        mol addfile $dcd waitfor all
+        puts [ join [ list $pdb "\n" $dcd ] "" ]
     }
-    if {$pdb_file != "" && $dcd_file == ""} {
+    if { $pdb != {} && $dcd == {} } {
         mol new
-        mol addfile $pdb_file
-        echo "No DCD file was found so only the PDB file was loaded."
+        mol addfile $pdb
+        puts $pdb
+        puts "No DCD file was found so only the PDB file was loaded."
     }
 }
-
