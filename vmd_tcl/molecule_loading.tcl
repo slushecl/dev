@@ -34,6 +34,8 @@ proc rglob {dirlist globlist} {
 # the files are searched for starting from the current working directory.
 # Usage:
 # load_pdb_dcd [pdb_directory | pdb_file] [dcd_directory | dcd_file]
+
+##### DEPRECATED #####
 proc load_pdb_dcd { {pdb_dir ""} {dcd_dir ""} } {
     set dir [ pwd ]
     if { $pdb_dir=="" } {
@@ -204,3 +206,58 @@ proc loader {args} {
     }
 }
 
+# Marks specified tubulin monomers blue if beta and red if alpha. Requires a
+# molecule ID to be inputted. Monomer arguments must be between 0 & 207.
+# Usage: mtcolor molecule_id [monomer_# ...]
+proc mtcolor {mid args} {
+    foreach arg $args {
+        if {$arg>207 || $arg<0} {
+            puts "$arg out of range. Value must be between 1 and 207 inclusive."
+            continue
+        } else {
+            set selalpha [atomselect $mid "chain A and fragment $arg"]
+            set selbeta [atomselect $mid "chain B and fragment $arg"]
+            if {[$selalpha num]>0} {
+                mol selection "fragment $arg"
+                mol representation Lines 3.0
+                mol material Opaque
+                mol color ColorID 1
+                mol addrep $mid
+            }
+            if {[$selbeta num]>0} {
+                mol selection "fragment $arg"
+                mol representation Lines 3.0
+                mol material Opaque
+                mol color ColorID 0
+                mol addrep $mid
+            }
+        }
+    }
+}
+
+proc pdbdcdpullcolor {args} {
+    loader pdb dcd
+    set nargs [llength $args]
+    set nreps [llength [molinfo list]]
+    for {set n 0} {$n < $nreps} {incr n} {
+        mol selection "chain A"
+        mol representation Lines 3.0
+        mol material Opaque
+        mol color ColorID 31
+        mol addrep $n
+
+        mol selection "chain B"
+        mol representation Lines 3.0
+        mol material Opaque
+        mol color ColorID 23
+        mol addrep $n
+
+        if {$nargs==0} {
+            mtcolor $n 88 89
+            continue
+        }
+        for {set m 0} {$m<$nargs} {incr m} {
+            mtcolor $n [lindex $args $m]
+        }
+    }
+}
