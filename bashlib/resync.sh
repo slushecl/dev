@@ -21,6 +21,9 @@ LOG_FILE=$4
 resyncer () {
   while :
   do
+    echo "
+" 1>>$LOG_FILE
+    date 1>>$LOG_FILE
     rsync -rtElv $SOURCE_DIR $TARGET_IP:$TARGET_DIR 1>>$LOG_FILE
     sleep 30m
   done
