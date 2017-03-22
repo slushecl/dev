@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/home/slushecl/dev/pylib/python3.5/bin/python3
 # -*- coding: utf-8 -*-
 import os, sys, re, argparse
 import matplotlib as mpl, matplotlib.pyplot as plt, os.path as path
